@@ -163,6 +163,15 @@ class Tree(object):
         #########################################
         ## INSERT YOUR CODE HERE
 
+        Xunique = np.unique(X[:,i])
+        #Yunique = np.unique(Y[:,i])
+        C={}
+
+        for val in Xunique:
+            index = (X[:,i] == val)
+            Xsub = X[index,:]
+            Ysub = Y[index,:]
+            C[val] = Node(Xsub,Ysub)
 
 
 
@@ -186,7 +195,7 @@ class Tree(object):
         ## INSERT YOUR CODE HERE
 
 
-
+        s = len(set(Y)) == 1
         
         #########################################
         return s
@@ -209,7 +218,7 @@ class Tree(object):
     
    
 
-
+        s = np.all(X == X[0, :])
 
  
         #########################################
@@ -362,7 +371,7 @@ class Tree(object):
         #########################################
         ## INSERT YOUR CODE HERE
 
-
+        X, Y = np.loadtxt(filename, delimiter = ',', skiprows = 1, unpack = True)
 
  
         #########################################
