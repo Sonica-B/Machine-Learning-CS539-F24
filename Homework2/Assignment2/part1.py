@@ -107,7 +107,7 @@ class Tree(object):
         ## INSERT YOUR CODE HERE
     
 
-
+        g = (Tree.entropy(Y)) - (Tree.conditional_entropy(Y,X))
  
         #########################################
         return g
@@ -130,6 +130,14 @@ class Tree(object):
         '''
         #########################################
         ## INSERT YOUR CODE HERE
+
+        best_g = 0
+        i = 0
+        for index in range(X.shape[1]):  # Iterate through each attribute
+            gain = Tree.information_gain(Y,X[:,index])
+            if gain > best_g:
+                best_g = gain
+                i = index
 
 
    
@@ -239,9 +247,8 @@ class Tree(object):
         '''
         #########################################
         ## INSERT YOUR CODE HERE
-    
 
-
+        y = Counter(Y).most_common(1)[0][0]  # Returns the most frequent label
 
  
         #########################################
@@ -265,8 +272,29 @@ class Tree(object):
         '''
         #########################################
         ## INSERT YOUR CODE HERE
-    
 
+        if Tree.stop1(t.Y):  # Check if all labels are the same
+            t.isleaf = True
+            t.p = t.Y[0]  # Set the node prediction to the common label
+            return t
+
+        if Tree.stop2(t.X):  # Check if all instances have the same attribute values
+            t.isleaf = True
+            t.p = Tree.most_common(t.Y)  # Set to the most common label
+            return t
+
+            # Find the best attribute to split
+        best_attr = Tree.best_attribute(t.X, t.Y)
+
+        # Split the node based on the best attribute
+        t.i = best_attr
+        t.C = Tree.split(t.X, t.Y, best_attr)
+
+        # Recursively build the tree for each child node
+        for val, child in t.C.items():
+            Tree.build_tree(child)
+
+        return t
    
 
 
@@ -290,8 +318,7 @@ class Tree(object):
         '''
         #########################################
         ## INSERT YOUR CODE HERE
-    
-
+        t = Tree.build_tree(Node(X, Y))
 
  
         #########################################
@@ -306,7 +333,7 @@ class Tree(object):
             Given a decision tree and one data instance, infer the label of the instance recursively. 
             Input:
                 t: the root of the tree.
-                x: the attribute vector, a numpy vectr of shape p.
+                x: the attribute vector, a numpy vector of shape p.
                    Each attribute value can be int/float/string.
             Output:
                 y: the class labels, a numpy array of length n.
@@ -315,7 +342,20 @@ class Tree(object):
         #########################################
         ## INSERT YOUR CODE HERE
 
-   
+        # Base case: if the current node is a leaf, return its predicted label
+        if t.isleaf:
+            y = t.p
+
+
+        # Recursive case: find the attribute value in the current node's split
+        attribute_value = x[t.i]
+
+        # Move to the child node corresponding to the attribute value, if it exists
+        if attribute_value in t.C:
+            y = t.inference(t.C[attribute_value], x)
+        else:
+            # If the attribute value is not in the child nodes, return None or handle the case
+            return None  # Could also return the most common class or a default value
 
 
 
@@ -342,7 +382,7 @@ class Tree(object):
         ## INSERT YOUR CODE HERE
 
 
-
+        Y = [Tree.inference(t,instance) for instance in X]
 
 
         #########################################
@@ -371,7 +411,14 @@ class Tree(object):
         #########################################
         ## INSERT YOUR CODE HERE
 
-        X, Y = np.loadtxt(filename, delimiter = ',', skiprows = 1, unpack = True)
+        data = np.load(filename, delimiter = ',', skiprows = 1, unpack = True)
+        # Separate the features (X) and labels (Y)
+        X = data.iloc[:, 1:].values  # Assuming first column is the target label
+        Y = data.iloc[:, 0].values  # First column is the class label
+
+        print("Features (X):", X)
+        print("Labels (Y):", Y)
+
 
  
         #########################################
