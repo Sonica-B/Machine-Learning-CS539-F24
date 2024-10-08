@@ -706,7 +706,7 @@ def test_predict():
 #-------------------------------------------------------------------------
 def test_load_dataset():
     '''(4.5 points) load_dataset'''
-    X, Y = Tree.load_dataset()
+    X, Y = load_dataset()
     assert type(X) == np.ndarray
     assert type(Y) == np.ndarray
     assert X.shape ==(7,42) 
@@ -727,7 +727,7 @@ def test_load_dataset():
 #-------------------------------------------------------------------------
 def test_dataset1():
     '''(4.5 points) test_dataset1'''
-    X, Y = Tree.load_dataset()
+    X, Y = load_dataset()
     t = Tree.train(X,Y) 
     Y_predict = Tree.predict(t,X) 
     accuracy = sum(Y==Y_predict)/42. # training accuracy of 42 training samples

@@ -30,7 +30,7 @@ class Node:
         self.X = X
         self.Y = Y
         self.i = i
-        self.C= C
+        self.C = C
         self.isleaf = isleaf
         self.p = p
 
@@ -131,10 +131,10 @@ class Tree(object):
         #########################################
         ## INSERT YOUR CODE HERE
 
-        best_g = 0
+        best_g = -float('inf')
         i = 0
-        for index in range(X.shape[1]):  # Iterate through each attribute
-            gain = Tree.information_gain(Y,X[:,index])
+        for index in range(X.shape[0]):  # Iterate through each attribute
+            gain = Tree.information_gain(Y,X[index,:])
             if gain > best_g:
                 best_g = gain
                 i = index
@@ -171,14 +171,15 @@ class Tree(object):
         #########################################
         ## INSERT YOUR CODE HERE
 
-        Xunique = np.unique(X[:,i])
+        Xunique = np.unique(X[i])
         #Yunique = np.unique(Y[:,i])
         C={}
 
         for val in Xunique:
-            index = (X[:,i] == val)
-            Xsub = X[index,:]
-            Ysub = Y[index,:]
+            index = np.where(X[i] == val)[0]
+            print(index)
+            Xsub = X[:, index]
+            Ysub = Y[index]
             C[val] = Node(Xsub,Ysub)
 
 
@@ -202,8 +203,11 @@ class Tree(object):
         #########################################
         ## INSERT YOUR CODE HERE
 
-
-        s = len(set(Y)) == 1
+        s = None
+        if len(np.unique(Y)) == 1:
+            s = True
+        else:
+            s = False
         
         #########################################
         return s
@@ -223,14 +227,18 @@ class Tree(object):
         #########################################
         ## INSERT YOUR CODE HERE
 
-    
-   
 
-        s = np.all(X == X[0, :])
+
+        for i in range (X.shape[0]):
+            if len(np.unique(X[i])) > 1:
+                return False
+
+
+
 
  
         #########################################
-        return s
+        return True
     
             
     #--------------------------
@@ -273,27 +281,36 @@ class Tree(object):
         #########################################
         ## INSERT YOUR CODE HERE
 
-        if Tree.stop1(t.Y):  # Check if all labels are the same
+        # Stopping condition 1: all labels are the same
+        if Tree.stop1(t.Y):
             t.isleaf = True
             t.p = t.Y[0]  # Set the node prediction to the common label
             return t
 
-        if Tree.stop2(t.X):  # Check if all instances have the same attribute values
+        # Stopping condition 2: all attribute values are the same
+        if Tree.stop2(t.X):
             t.isleaf = True
             t.p = Tree.most_common(t.Y)  # Set to the most common label
             return t
 
-            # Find the best attribute to split
+        # Find the best attribute to split
         best_attr = Tree.best_attribute(t.X, t.Y)
-
-        # Split the node based on the best attribute
         t.i = best_attr
+        t.p = Tree.most_common(t.Y)
+
+        if best_attr is None:
+            t.isleaf = True
+            t.p = Tree.most_common(t.Y)
+            return t
+
+        # Initialize children dictionary
         t.C = Tree.split(t.X, t.Y, best_attr)
+
 
         # Recursively build the tree for each child node
         for val, child in t.C.items():
-            Tree.build_tree(child)
-
+           # Tree.build_tree(child)
+            t.C[val] = Tree.build_tree(child)
         return t
    
 
@@ -342,27 +359,22 @@ class Tree(object):
         #########################################
         ## INSERT YOUR CODE HERE
 
-        # Base case: if the current node is a leaf, return its predicted label
+
         if t.isleaf:
-            y = t.p
-
-
-        # Recursive case: find the attribute value in the current node's split
-        attribute_value = x[t.i]
-
-        # Move to the child node corresponding to the attribute value, if it exists
-        if attribute_value in t.C:
-            y = t.inference(t.C[attribute_value], x)
+            y= t.p
         else:
-            # If the attribute value is not in the child nodes, return None or handle the case
-            return None  # Could also return the most common class or a default value
+            val = x[t.i]
+            if val in t.C:
+                return Tree.inference(t.C[val], x)
+            #else:
+            #   return None  # If the value doesn't exist in the tree
 
+        y = t.p
 
-
-
- 
-        #########################################
         return y
+
+        #########################################
+
     
     #--------------------------
     @staticmethod
@@ -381,9 +393,7 @@ class Tree(object):
         #########################################
         ## INSERT YOUR CODE HERE
 
-
-        Y = [Tree.inference(t,instance) for instance in X]
-
+        Y = np.array([Tree.inference(t,X[:,instance]) for instance in range(X.shape[1])])
 
         #########################################
         return Y
@@ -391,38 +401,43 @@ class Tree(object):
 
 
     #--------------------------
-    @staticmethod
-    def load_dataset(filename = 'data1.csv'):
-        '''
-            Load dataset 1 from the CSV file: 'data1.csv'. 
-            The first row of the file is the header (including the names of the attributes)
-            In the remaining rows, each row represents one data instance.
-            The first column of the file is the label to be predicted.
-            In remaining columns, each column represents an attribute.
-            Input:
-                filename: the filename of the dataset, a string.
-            Output:
-                X: the feature matrix, a numpy matrix of shape p by n.
-                   Each element can be int/float/string.
-                   Here n is the number data instances in the dataset, p is the number of attributes.
-                Y: the class labels, a numpy array of length n.
-                   Each element can be int/float/string.
-        '''
-        #########################################
-        ## INSERT YOUR CODE HERE
-
-        data = np.load(filename, delimiter = ',', skiprows = 1, unpack = True)
-        # Separate the features (X) and labels (Y)
-        X = data.iloc[:, 1:].values  # Assuming first column is the target label
-        Y = data.iloc[:, 0].values  # First column is the class label
-
-        print("Features (X):", X)
-        print("Labels (Y):", Y)
 
 
- 
-        #########################################
-        return X,Y
+def load_dataset(filename = 'data1.csv'):
 
+    '''
+        Load dataset 1 from the CSV file: 'data1.csv'.
+        The first row of the file is the header (including the names of the attributes)
+        In the remaining rows, each row represents one data instance.
+        The first column of the file is the label to be predicted.
+        In remaining columns, each column represents an attribute.
+        Input:
+            filename: the filename of the dataset, a string.
+        Output:
+            X: the feature matrix, a numpy matrix of shape p by n.
+               Each element can be int/float/string.
+               Here n is the number data instances in the dataset, p is the number of attributes.
+            Y: the class labels, a numpy array of length n.
+               Each element can be int/float/string.
+    '''
+    #########################################
+    ## INSERT YOUR CODE HERE
 
+#     try:
+    data = np.genfromtxt(filename, delimiter=',', dtype=None, encoding=None)
+    #print(data)
+
+   # print(data.shape)
+    #Separate the features (X) and labels (Y)
+    X = data[1:, 1:].transpose()  # All rows, all columns except the first (features)
+    #print(X.shape)
+    Y = data[1:, 0]  # All rows, only the first column (labels)
+    #print(X)
+    #print("Dataset loaded successfully.")
+    return X, Y
+
+X, Y = (load_dataset())
+Tree.split(X,Y,1)
+
+    #########################################
 
