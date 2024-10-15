@@ -6,6 +6,8 @@ __pycache__/
 #DataSet Folder
 /datasets
 
+.idea/
+
 # C extensions
 *.so
 

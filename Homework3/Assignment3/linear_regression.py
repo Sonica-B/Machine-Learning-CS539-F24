@@ -25,7 +25,7 @@ def compute_Phi(x,p):
     #########################################
     ## INSERT YOUR CODE HERE
 
-
+    Phi = np.vstack([x**i for i in range(p)]).T
 
     #########################################
     return Phi 
@@ -44,7 +44,7 @@ def compute_yhat(Phi, w):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
+    yhat = np.dot(Phi,w)
 
     #########################################
 
@@ -62,7 +62,7 @@ def compute_L(yhat,y):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
+    L = np.mean((y - yhat) ** 2)/2
 
 
     #########################################
@@ -85,7 +85,7 @@ def compute_dL_dw(y, yhat, Phi):
     #########################################
     ## INSERT YOUR CODE HERE
 
-
+    dL_dw = -np.dot(Phi.T, (y - yhat)) / len(y)
 
     #########################################
     return dL_dw
@@ -107,7 +107,7 @@ def update_w(w, dL_dw, alpha = 0.001):
     #########################################
     ## INSERT YOUR CODE HERE
 
-
+    w = w - alpha * dL_dw
     #########################################
     return w
 
@@ -129,15 +129,16 @@ def train(X, Y, alpha=0.001, n_epoch=100):
     # initialize weights as 0
     w = np.array(np.zeros(X.shape[1])).T
 
-    for _ in range(n_epoch):
+    for epoch in range(n_epoch):
 
     #########################################
     ## INSERT YOUR CODE HERE
 
     # Back propagation: compute local gradients 
-        
+        yhat = compute_yhat(X, w)
+        dL_dw = compute_dL_dw(Y, yhat, X)
+        w = update_w(w, dL_dw, alpha)
 
-        
         
     # update the parameters w
         
