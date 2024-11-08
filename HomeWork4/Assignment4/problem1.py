@@ -278,7 +278,9 @@ def compute_dL_dz(dL_da,da_dz):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-    dL_dz = np.dot(dL_da, da_dz)
+    dL_da = dL_da.flatten()  # Flatten dL_da to shape (c,)
+    dL_dz = np.dot(dL_da, da_dz)  # Matrix multiplication now works as expected
+
     #########################################
     return dL_dz
 
