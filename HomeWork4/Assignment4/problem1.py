@@ -299,6 +299,8 @@ def compute_dL_dW(dL_dz,dz_dW):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
+    # Flatten dL_dz to ensure compatibility with dz_dW
+    dL_dz = dL_dz.flatten()  # Converts (c, 1) to (c,)
     dL_dW = dL_dz[:, None] * dz_dW
     #########################################
     return dL_dW
