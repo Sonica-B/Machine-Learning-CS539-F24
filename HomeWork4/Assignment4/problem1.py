@@ -153,9 +153,12 @@ def compute_dL_da(a, y):
     '''
     #########################################
     ## INSERT YOUR CODE HERE    
-    c = a.shape[0]
-    dL_da = np.zeros(c)
-    dL_da[y] = -1 / a[y]
+    # Initialize gradient array
+    dL_da = np.zeros_like(a)
+
+    # Avoid division by zero
+    epsilon = 1e-12
+    dL_da[y] = -1 / max(a[y], epsilon)
     #########################################
     return dL_da 
 
@@ -296,7 +299,7 @@ def compute_dL_dW(dL_dz,dz_dW):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-    dL_dW = dL_dz[:, None] @ dz_dW
+    dL_dW = dL_dz[:, None] * dz_dW
     #########################################
     return dL_dW
 
