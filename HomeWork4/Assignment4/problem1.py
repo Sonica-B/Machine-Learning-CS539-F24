@@ -64,7 +64,7 @@ def compute_z(x,W,b):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
+    z = np.dot(W, x) + b
     #########################################
     return z 
 
@@ -80,7 +80,7 @@ def compute_a(z):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
+    a = np.exp(z) / np.sum(np.exp(z))
     #########################################
     return a
 
@@ -96,7 +96,7 @@ def compute_L(a,y):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
+    L = -np.log(a[y])
     #########################################
     return L 
 
@@ -116,7 +116,9 @@ def forward(x,y,W,b):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
+    z = compute_z(x, W, b)
+    a = compute_a(z)
+    L = compute_L(a, y)
     #########################################
     return z, a, L 
 
@@ -140,7 +142,9 @@ def compute_dL_da(a, y):
     '''
     #########################################
     ## INSERT YOUR CODE HERE    
-
+    c = a.shape[0]
+    dL_da = np.zeros(c)
+    dL_da[y] = -1 / a[y]
     #########################################
     return dL_da 
 
@@ -159,7 +163,14 @@ def compute_da_dz(a):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
+    c = a.shape[0]
+    da_dz = np.zeros((c, c))
+    for i in range(c):
+        for j in range(c):
+            if i == j:
+                da_dz[i, j] = a[i] * (1 - a[i])
+            else:
+                da_dz[i, j] = -a[i] * a[j]
     #########################################
     return da_dz 
 
@@ -178,7 +189,11 @@ def compute_dz_dW(x,c):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
+    p = x.shape[0]
+    dz_dW = np.zeros((c, p))
+    for i in range(c):
+        for j in range(p):
+            dz_dW[i, j] = x[j]
     #########################################
     return dz_dW
 
@@ -198,7 +213,7 @@ def compute_dz_db(c):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
+    dz_db = np.ones(c)
     #########################################
     return dz_db
 
@@ -227,7 +242,10 @@ def backward(x, y, a):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
+    dL_da = compute_dL_da(a, y)
+    da_dz = compute_da_dz(a)
+    dz_dW = compute_dz_dW(x, a.shape[0])
+    dz_db = compute_dz_db(a.shape[0])
     #########################################
     return dL_da, da_dz, dz_dW, dz_db
 
@@ -246,7 +264,7 @@ def compute_dL_dz(dL_da,da_dz):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
+    dL_dz = np.dot(dL_da, da_dz)
     #########################################
     return dL_dz
 
@@ -267,7 +285,7 @@ def compute_dL_dW(dL_dz,dz_dW):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
+    dL_dW = dL_dz[:, None] @ dz_dW
     #########################################
     return dL_dW
 
@@ -289,7 +307,7 @@ def compute_dL_db(dL_dz,dz_db):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
+    dL_db = dL_dz * dz_db
     #########################################
     return dL_db 
 
@@ -312,7 +330,7 @@ def update_W(W, dL_dW, alpha=0.001):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
+    W = W - alpha * dL_dW
     #########################################
     return W
 
@@ -334,7 +352,7 @@ def update_b(b, dL_db, alpha=0.001):
     
     #########################################
     ## INSERT YOUR CODE HERE
-
+    b = b - alpha * dL_db
     #########################################
     return b 
 
@@ -368,7 +386,25 @@ def train(X, Y, alpha=0.01, n_epoch=100):
             print('for loop')
             #########################################
             ## INSERT YOUR CODE HERE
+            # Compute logits z = W^T * x + b
+            z = x @ W.T + b
 
+            # Compute probabilities p using softmax
+            p = np.exp(z) / np.sum(np.exp(z))
+
+            # Compute the gradient of loss w.r.t. logits dL_dz
+            dL_dz = p.copy()
+            dL_dz[y] -= 1
+
+            # Compute the gradient of loss w.r.t. weights dL_dW
+            dL_dW = dL_dz[:, None] @ x[None, :]
+
+            # Compute the gradient of loss w.r.t. biases dL_db
+            dL_db = dL_dz
+
+            # Update weights and biases using gradient descent
+            W = W - alpha * dL_dW
+            b = b - alpha * dL_db
 
             #########################################
     return W, b
@@ -394,7 +430,18 @@ def predict(Xtest, W, b):
         print('for loop')
         #########################################
         ## INSERT YOUR CODE HERE
+        # Compute logits z = W^T * x + b
+        z = x @ W.T + b
 
+        # Compute probabilities P using softmax
+        p = np.exp(z) / np.sum(np.exp(z))
+
+        # Get the predicted label as the index of the max probability
+        y = np.argmax(p)
+
+        # Store the predicted label and probabilities
+        Y[i] = y
+        P[i] = p
         #########################################
     return Y, P 
 
