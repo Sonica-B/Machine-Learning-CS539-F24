@@ -80,7 +80,7 @@ def compute_a(z):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-    # Shift z by subtracting max(z) for numerical stability
+
     z = z - np.max(z)
     exp_z = np.exp(np.clip(z, -500, 500))  # Clip z to avoid very large or small values
     a = exp_z / np.sum(exp_z)
@@ -153,10 +153,10 @@ def compute_dL_da(a, y):
     '''
     #########################################
     ## INSERT YOUR CODE HERE    
-    # Initialize gradient array
+
     dL_da = np.zeros_like(a)
 
-    # Avoid division by zero
+    #Avoid division by zero
     epsilon = 1e-12
     dL_da[y] = -1 / max(a[y], epsilon)
     #########################################
@@ -279,7 +279,7 @@ def compute_dL_dz(dL_da,da_dz):
     #########################################
     ## INSERT YOUR CODE HERE
     dL_da = dL_da.flatten()  # Flatten dL_da to shape (c,)
-    dL_dz = np.dot(dL_da, da_dz)  # Matrix multiplication now works as expected
+    dL_dz = np.dot(dL_da, da_dz)
 
     #########################################
     return dL_dz
@@ -301,8 +301,8 @@ def compute_dL_dW(dL_dz,dz_dW):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-    # Flatten dL_dz to ensure compatibility with dz_dW
-    dL_dz = dL_dz.flatten()  # Converts (c, 1) to (c,)
+    #Flatten dL_dz
+    dL_dz = dL_dz.flatten()  #Converts (c, 1) to (c,)
     dL_dW = dL_dz[:, None] * dz_dW
     #########################################
     return dL_dW
