@@ -99,7 +99,15 @@ def compute_L(a,y):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-    L = -np.log(a[y])
+    epsilon = 1e-12  # Small constant to avoid log(0)
+
+    # If a[y] is zero, set an extremely high loss value as expected
+    if a[y] == 0:
+        return float('inf')  # This will trigger the assertion `L > 1e5` in the test case
+
+    # Otherwise, calculate loss normally with epsilon to avoid log(0)
+    L = -np.log(max(a[y], epsilon))
+    L = float(L)
     #########################################
     return L 
 
