@@ -80,7 +80,10 @@ def compute_a(z):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-    a = np.exp(z) / np.sum(np.exp(z))
+    # Shift z by subtracting max(z) for numerical stability
+    z = z - np.max(z)
+    exp_z = np.exp(np.clip(z, -500, 500))  # Clip z to avoid very large or small values
+    a = exp_z / np.sum(exp_z)
     #########################################
     return a
 
